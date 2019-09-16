@@ -34,8 +34,8 @@ I don't have the comprehensive results now, because machine learns nothing with 
    - Large dictionary: the words segmented from this packages are sometimes not formal words...
 - Concatenate TF-IDF values the the embedding vector and Stylometric vecot (put emphasize some high frequence words used for certain authors)
 - Concatenate stylometric vectors to the latent vector . Moreover, we can search more stylometric... 
-- Survey state-of-the-art paper of the document classification prbolem or some lauguage data analysis technique.
-- I may survey some retrieval-based models. 
+- Survey state-of-the-art paper of the document classification prbolem and some lauguage data analysis technique.
+- If failing again, I may try some retrieval-based models. 
 
 ## **Reference**
 [Github](https://github.com/tqtg/hierarchical-attention-networks)
