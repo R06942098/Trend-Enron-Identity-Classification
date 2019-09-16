@@ -39,3 +39,8 @@ I don't have the comprehensive results now, because machine learns nothing with 
 
 ## **Reference**
 [Github](https://github.com/tqtg/hierarchical-attention-networks)
+
+
+## **Author**
+
+* **Bo-Wei Tseng** - *NTU* - [Github](https://github.com/R06942098)
