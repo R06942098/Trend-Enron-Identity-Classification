@@ -4,13 +4,14 @@ import nltk
 import numpy as np
 import pandas as pd 
 from sklearn.model_selection import train_test_split
-from nltk.tokenize import WordPunctTokenizer
+from nltk.tokenize import WordPunctTokenizer, word_tokenize, sent_tokenize
 from nltk.corpus import stopwords 
 from collections import defaultdict
+from keras.preprocessing.text import Tokenizer, text_to_word_sequence
+from keras.preprocessing.sequence import pad_sequences
 
 
-
-#email_df = pd.read_csv("enron_all.csv",na_filter= False)
+email_df = pd.read_csv("enron_all.csv",na_filter= False)
 #file_name = list(email_df["Message-ID"].values)
 trend_path  = "Enron" 
 author_list = os.listdir(trend_path)
@@ -20,6 +21,7 @@ for i, author in enumerate(author_list):
 	author_dict[author] = i
 
 sent_tokenizer = nltk.data.load('tokenizers/punkt/english.pickle')
+
 word_tokenizer = WordPunctTokenizer()
 
 
@@ -73,29 +75,33 @@ def build_vocab(vocab_path, enron_df):
 	if os.path.exists(vocab_path):
 		vocab_file = open(vocab_path, 'rb')
 		vocab = pickle.load(vocab_file)
+		print(len(vocab))
 		print("Load successfully !!")
 
 	else: 
 		word_freq_dict = defaultdict(int)
 		all_content = enron_df["Content"].values
-		all_subject = enron_df["Subject"].values
+		#all_subject = enron_df["Subject"].values
 		for i in all_content:
 			i = i.lower()
-			words = word_tokenizer.tokenize(i)
+			#words = word_tokenizer.tokenize(i)
+			words = word_tokenize(i)
 			for word in words:
 				word_freq_dict[word] += 1
 
+		"""
 		for i in all_subject:
 			i = i.lower()
 			words = word_tokenizer.tokenize(i)
 			for word in words:
 				word_freq_dict[word] += 1
+		"""
 
 		vocab = {}
 		i = 1
 		vocab['UNK'] = 0
 		for word, freq in word_freq_dict.items():
-			if freq > 5:
+			if freq > 20:
 				vocab[word] = i
 				i += 1
 
@@ -114,9 +120,9 @@ def process_whole_data(data_pickle_path, email_df, author_dict, max_sent_len=100
 	## Truncate the max_sen_len = 100, max_sen_words = 30 
 	## Further Improvment: incorporate subject information.
 	if not os.path.exists(data_pickle_path):
-		eng_stopwords = set(stopwords.words('english'))
-		eng_stopwords.add("RE")
-		eng_stopwords.add("FW")
+		#eng_stopwords = set(stopwords.words('english'))
+		#eng_stopwords.add("RE")
+		#eng_stopwords.add("FW")
 		datas = email_df.values
 		data_whiten = np.zeros((data.shape[0]), max_sent_len, max_sent_words, dtype=int64)
 		label = [] 
@@ -128,15 +134,17 @@ def process_whole_data(data_pickle_path, email_df, author_dict, max_sent_len=100
 			sents = sent_tokenizer.tokenize(content)
 			doc = np.zeros([max_sent_len, max_sent_words])
 			for i, sent in enumerate(sents):
+				sent = sent.lower()
 				if i < max_sen_len: 
 					word_to_index = np.zeros([max_sent_words], dtype=int64)
 					temp_word_list = word_tokenizer.tokenize(sent)
 					place = 0
 					for word in temp_word_list: 
 						if place < max_sent_words :
-							if word not in eng_stopwords: 
-								word_to_index[place] =  vocab.get(word, UNK)
-								place += 1 
+							# Not delete the stop words.
+							#if word not in eng_stopwords: 
+							word_to_index[place] = vocab.get(word, UNK)
+							place += 1 
 
 					"""
 					for j, word in enumerate(word_tokenizer.tokenize(sent)):
@@ -156,9 +164,9 @@ def process_whole_data(data_pickle_path, email_df, author_dict, max_sent_len=100
 def process_whole_data_without_padding(data_pickle_path, email_df, author_dict):
 	data_list= []
 	if not os.path.exists(data_pickle_path):
-		eng_stopwords = set(stopwords.words('english'))
-		eng_stopwords.add("RE")
-		eng_stopwords.add("FW")
+		#eng_stopwords = set(stopwords.words('english'))
+		#eng_stopwords.add("RE")
+		#eng_stopwords.add("FW")
 		datas = email_df.values
 		label = [] 
 		vocab = build_vocab("vocab", email_df)
@@ -175,14 +183,19 @@ def process_whole_data_without_padding(data_pickle_path, email_df, author_dict):
 					label.append(149)
 				else: 
 					print("Error")
-			sents = sent_tokenizer.tokenize(content)
+
+			#sents = sent_tokenizer.tokenize(content)
+			sents = sent_tokenize(content)
 			doc =  [] 
 			for i, sent in enumerate(sents):
+				sent = sent.replace("\n", "")
+				sent = sent.replace("\t", "")
 				temp = []
-				temp_word_list = word_tokenizer.tokenize(sent)
+				#temp_word_list = word_tokenizer.tokenize(sent)
+				temp_word_list = word_tokenize(sent)
 				for word in temp_word_list: 
-						if word not in eng_stopwords: 
-							temp.append(vocab.get(word, UNK))
+						#if word not in eng_stopwords: 
+						temp.append(vocab.get(word, UNK))
 
 				doc.append(temp)
 			data_list.append(doc)
@@ -198,9 +211,45 @@ def process_whole_data_without_padding(data_pickle_path, email_df, author_dict):
 		#print(data[3])
 	return data, label
 
+"""
+def preproces_data_using_keras(data_pickle_path, email_df, author_dict):
+	data_list= []
+	if not os.path.exists(data_pickle_path):
+		datas = email_df.values
+		label = [] 
+		for line, data in enumerate(datas): 
+			content = data[-2].lower()
+			#content = content.replace("\n", "")
+			#content = content.replace("\t", "")
+			author_name = data[-1]
+			if author_name in author_dict.keys():
+				label.append(author_dict[data[-1]])	
+
+			else: 
+				if author_name == "harris-s":
+					label.append(148)
+				elif author_name == "stokley-c":
+					label.append(149)
+				else: 
+					print("Error")
+
+			sents = sent_tokenizer.tokenize(content)
+			doc = []
+			for sent in sents: 
+				sent = sent.replace("\n", "")
+				sent = sent.replace("\t", "")
+				doc.append(sent)
+			data_list.append(doc)
+
+
+	else:
+		data_file = open(data_pickle_path, "rb")
+		data, label = pickle.load(data_file)
+"""
+
 #x_data, y_data = self.process_whole_data("data_path", email_df, author_dict)
-#data, label = process_whole_data_without_padding("data", email_df, author_dict)
-#train_data, val_data, test_data, train_label, val_label, test_label = splitting_dataset(data, label, trend_index)
+data, label = process_whole_data_without_padding("data", email_df, author_dict)
+train_data, val_data, test_data, train_label, val_label, test_label = splitting_dataset(data, label, trend_index)
 #dada = splitting_dataset(data, label, trend_index)
 
 def embedding_matrix(pretrained_vec_path, vaoca_path, email_df, emb_dim):
@@ -212,6 +261,7 @@ def embedding_matrix(pretrained_vec_path, vaoca_path, email_df, emb_dim):
 			vec = np.array(values[1:], dtype='float32')
 			embedding_index[word] = vec 
 	vocab = build_vocab(vaoca_path, email_df)
+	print(vocab)
 	emb_matrix = np.random.uniform(-0.5, 0.5, (len(vocab)+1, emb_dim)) / emb_dim
 	#emb_matrix = np.random.random(len(vocab)+1, emb_dim)
 	for word, i in vocab.items():
