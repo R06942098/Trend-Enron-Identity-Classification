@@ -10,7 +10,7 @@ I execute this script to get the index of 112000 samples from the dataset provid
 
 ### Tokenize
 ```
-Usw NLTK package.
+Use NLTK package.
 ```
 ### Pretrained Embedding 
 [GloVe Model pretrained on Wikipedia dataset](https://github.com/stanfordnlp/GloVe)
@@ -28,7 +28,7 @@ python main_HAN.py --train True
 ```
 Some paratmeters whcih can be tuned are listed in this filem, too.
 ## **Evaluation and Future Works**
-I don't have the comprehensive results now, because machine learns nothing with the data preprocessed by me. I find several problems and it can be done duing my next military vocation (9/27~9/29): 
+I don't have the comprehensive results now, because machine learns nothing with the data preprocessed by me. I find several problems and it may be done duing my next military vacation: 
 
 - The NLTK word tokenize seems to have some problems: 
    - Large dictionary: the words segmented from this packages are sometimes not formal words...
@@ -40,6 +40,9 @@ I don't have the comprehensive results now, because machine learns nothing with 
 ## **Reference**
 [Github](https://github.com/tqtg/hierarchical-attention-networks)
 
+## **Some advice from Leo**
+- NER (Named Entity Recognition)
+- EDA (Exploratory Data Analysis/ Easy Data augumentation) 
 
 ## **Author**
 
