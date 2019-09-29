@@ -13,7 +13,8 @@ I execute this script to get the index of 112000 samples from the dataset provid
 Use NLTK package.
 ```
 ### Pretrained Embedding 
-[GloVe Model pretrained on Wikipedia dataset](https://github.com/stanfordnlp/GloVe)
+I choose the pretrained word vectors from 
+[GloVe Model pretrained on Wikipedia dataset](https://github.com/stanfordnlp/GloVe) instead of using the word2vec (Skip gram/CBOW).
 
 
 ## **Model**
@@ -38,10 +39,12 @@ I don't have the comprehensive results now, because machine learns nothing with 
 - If failing again, I may try some retrieval-based models. 
 
 ## **Reference**
-[Github](https://github.com/tqtg/hierarchical-attention-networks)
+[Github-HAN](https://github.com/tqtg/hierarchical-attention-networks)
 
 ## **Some advice from Leo**
-- NER (Named Entity Recognition)
+I should survey for the terminology in the bullets below:
+
+- NER (Named Entity Recognition): 
 - EDA (Exploratory Data Analysis/ Easy Data augumentation) 
 
 ## **Author**
