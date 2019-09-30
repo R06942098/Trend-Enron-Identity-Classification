@@ -3,6 +3,7 @@
 ## **Data**
 Because some of the data (content) from trend tech  are empty files, I download the complete Enron email dataset from the [Kaggle link](https://www.kaggle.com/wcukierski/enron-email-dataset). 
 ### Preprocess
+May consider stemming and Lemmatisation to minimize the dictionary.
 ```
 python data_prepro.py
 ```
@@ -34,12 +35,12 @@ I don't have the comprehensive results now, because machine learns nothing with 
 - The NLTK word tokenize seems to have some problems: 
    - Large dictionary: the words segmented from this packages are sometimes not formal words...
 - Concatenate TF-IDF values the the embedding vector and Stylometric vecot (put emphasize some high frequence words used for certain authors)
-- Concatenate stylometric vectors to the latent vector . Moreover, we can search more stylometric...(Average Word Length
-Average Sentence Length By Word
-Average Sentence Length By Character
-Special Character Count
-Average Syllable per Word
-Functional Words Count
+- Concatenate stylometric vectors to the latent vector . Moreover, we can search more stylometric...(Average Word Length, 
+Average Sentence Length By Word, 
+Average Sentence Length By Character, 
+Special Character Count, 
+Average Syllable per Word, 
+Functional Words Count, 
 Punctuation Count)
 - Survey state-of-the-art paper of the document classification prbolem and some lauguage data analysis technique.
 - If failing again, I may try some retrieval-based models. 
