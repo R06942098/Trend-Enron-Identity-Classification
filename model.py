@@ -31,10 +31,20 @@ class HAN_Classifier:
 
         self.email_df = pd.read_csv(self.csv_path, na_filter= False)
         self.trend_index = data_prepro.load_index(self.index_path)
-        data, label = data_prepro.process_whole_data_without_padding(self.data_path, self.email_df, data_prepro.author_dict)
-        self.train_data, self.val_data, self.test_data, self.train_label, self.val_label, self.test_label = data_prepro.splitting_dataset(data, label, self.trend_index)
+        self.safe_index = data_prepro.safe_index
+        data, label = data_prepro.process_whole_data_without_padding_tfidf(self.data_path, self.email_df, data_prepro.author_dict, self.safe_index)
+        self.train_data, self.val_data, self.test_data, self.train_label, self.val_label, self.test_label = data_prepro.splitting_dataset(data, label, self.trend_index, self.safe_index)
+        
+
+
+        print("Training data size: {}.".format(self.train_data.shape))
+        print("Testing data size: {}.".format(self.val_data.shape))
+        print("Validation data size: {}.".format(self.test_data.shape))
+
         self.num_classes = max(label)+1
-        self.pretrained_emb, self.vocab_size = data_prepro.embedding_matrix(self.emb_path+"glove.6B."+str(self.embedding_size)+"d.txt", self.vocab_path, self.email_df, self.embedding_size)
+
+        #print(self.num_classes)
+        self.pretrained_emb, self.vocab_size = data_prepro.embedding_matrix(self.emb_path+"glove.6B."+str(self.embedding_size)+"d.txt", self.vocab_path, self.email_df, self.embedding_size, self.safe_index)
         self.build_graph()
 
 
@@ -156,11 +166,12 @@ class HAN_Classifier:
         ## output_layers: 
         with tf.variable_scope('classifier'):
             #self.logits = tf.layers.dense(inputs=self.sent_outputs, units=self.num_classes, name='logits')
-            self.logits = ly.fully_connected(self.sent_outputs, self.num_classes)
+            self.sent_outputs = ly.fully_connected(self.sent_outputs, 128)
+            self.logits = ly.fully_connected(self.sent_outputs, self.num_classes, activation_fn=None)
             self.prob = tf.nn.softmax(self.logits)
 
     def get_feed_dict(self, docs, labels, training=False):
-        padded_docs, sent_lengths, max_sent_length, word_lengths, max_word_length = batch_doc_normalize(docs, 40, 100)
+        padded_docs, sent_lengths, max_sent_length, word_lengths, max_word_length = batch_doc_normalize(docs, 30, 100)
         fd = {
           self.docs: padded_docs,
           self.sent_lengths: sent_lengths,
@@ -200,7 +211,8 @@ class HAN_Classifier:
                 _, _loss, _acc = self.sess.run([self.train_op, self.cls_loss, self.batch_acc],
                                          feed_dict=self.get_feed_dict(batch_docs, batch_labels, training=True))
                 val_count += 1 
-                if val_count % 300 == 0:
+                #print(_loss)
+                if val_count % 100 == 0:
 
                     val_loss = []
                     val_acc = []

@@ -38,8 +38,8 @@ def batch_doc_normalize(docs, cut_off_sent_length, cut_off_word_length):
     sent_lengths = np.array([len(doc) if len(doc) <= cut_off_sent_length else cut_off_sent_length for doc in docs], dtype=np.int32)
     max_sent_length = sent_lengths.max()
     word_lengths = [[len(sent) if len(sent) <= cut_off_word_length else cut_off_word_length for sent in doc] for doc in docs]
+    #print(word_lengths)
     max_word_length = max(map(max, word_lengths))
-
     padded_docs = np.zeros(shape=[len(docs), max_sent_length, max_word_length], dtype=np.int32)  # PADDING 0
     word_lengths = np.zeros(shape=[len(docs), max_sent_length], dtype=np.int32)
 

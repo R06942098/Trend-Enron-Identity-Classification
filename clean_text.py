@@ -47,6 +47,13 @@ def map_to_list(emails, key):
             results.append(email[key])
     return results
 
+def clean_text(text):
+    #text = BeautifulSoup(text, 'html.parser').get_text()
+    text = re.sub(r'[^a-zA-Z]', ' ', text)
+    words = text.lower().split()
+    words = [w for w in words if w not in eng_stopwords]
+    return ' '.join(words)
+    
 #email_df = pd.read_csv("enron_all.csv",na_filter= False)
 #email = pd.read_csv("emails.csv")
 #email_df = pd.DataFrame(parse_into_emails(email.message))
@@ -54,8 +61,7 @@ def map_to_list(emails, key):
 #print(email_df['body'].values[517385])
 #email_df.to_csv("enron_min.csv", index=False)
 
-clean = True
-
+clean = False
 if clean:
 	email_file = pd.read_csv("enron_all.csv", na_filter= False)
 	subject = email_file[["Subject"]].values
@@ -73,7 +79,15 @@ if clean:
 		list_from.append(l[0])
 		### filter... Forwarded 
 		k = k[0].split("---------------------- Forwarded")[0]
-		k = k.split(" -----Original Message-----\n")[0]
+		k = k.split("----- Forwarded by")[0]
+		k = k.split("-----Forwarded by")[0]
+		k = k.split("-----Original Message-----")[0]
+		k = k.split("----- Original Message -----")[0]
+		#k = k.split("--------- Inline attachment follows ---------")
+		k = k.split("From: ")[0]
+		k = k.split("To: ")[0]
+
+		#k = k.split(" -----Original Message-----\n")[0]
 		if k in ["", "\n\n"]:
 			list_content.append("Empty")
 		else:
@@ -97,6 +111,8 @@ else:
 	user_id = email_file[["user_id"]].values
 	user_from = email_file[["from"]].values
 
+	"""
+	safe_index = []
 	count = 0
 	index = 0
 	for i, j in zip(user_id, user_from):
@@ -106,26 +122,31 @@ else:
 			user_name_list = user_name.split("-")
 			from_name_list = from_name.split(".")
 			from_name_list.reverse()
-			print(index)
 			if from_name_list[0] == user_name_list[0]:
 				#if from_name_list[2] == "l":
 				#	count += 1
+				safe_index.append(index)
 				count += 1
 
 		else:
 			user_name_list = user_name.split("-")
 			from_name_list = from_name.split(".")
 			from_name_list.reverse()
-			print(index)
 			if from_name_list[0] == user_name_list[0]:
 				#if from_name_list[1][0] == user_name_list[1]:
 				#	count += 1 
 				count += 1 
+				safe_index.append(index)
 		index += 1 
-
+	
+	np.save("safe_index.npy", safe_index)
 	print(count)
-
-
+	"""
+	save_index = np.load("safe_index.npy",)
+	for i in save_index:
+		kk = content[i]
+		if "Original" in kk :
+			print(kk)
 
 
 
